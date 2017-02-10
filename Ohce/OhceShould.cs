@@ -114,21 +114,35 @@ namespace Ohce
             _console = console;
             _timeProvider = timeProvider;
             _name = name;
-            var hour = _timeProvider.GetCurrentTime().Hour;
-            var morning = hour >= 6 && hour <= 12;
-            var evening = hour >= 12 && hour < 20;
-            if (morning)
+            GreetByTime();
+        }
+
+        private void GreetByTime()
+        {
+            if (IsMorning())
             {
-                console.Write($"Buenos días {name}");
+                _console.Write($"Buenos días {_name}");
             }
-            else if (evening)
+            else if (IsEvening())
             {
-                console.Write($"Buenas tardes {name}");
+                _console.Write($"Buenas tardes {_name}");
             }
             else
             {
-                console.Write($"Buenas noches {name}");
+                _console.Write($"Buenas noches {_name}");
             }
+        }
+
+        private bool IsEvening()
+        {
+            var hour = _timeProvider.GetCurrentTime().Hour;
+            return hour >= 12 && hour < 20;
+        }
+
+        private bool IsMorning()
+        {
+            var hour = _timeProvider.GetCurrentTime().Hour;
+            return hour >= 6 && hour <= 12;
         }
 
         public void Echo(string value)
