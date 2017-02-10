@@ -11,6 +11,7 @@ namespace Ohce
 {
     public class OhceShould
     {
+        private bool endSignal;
         private readonly IConsole _console = Substitute.For<IConsole>();
         private readonly ITimeProvider _timeProvider = Substitute.For<ITimeProvider>();
         //return the reverse echo of the word
@@ -59,6 +60,15 @@ namespace Ohce
         }
 
         [Fact]
+        public void sends_end_signal_on_stop()
+        {
+            var interpreter = GivenAnOhceInterpreter(name: "Pedro");
+            interpreter.Echo("Stop!");
+            endSignal.Should().BeTrue();
+        }
+
+
+        [Fact]
         public void greet_at_night()
         {
             _timeProvider.GetCurrentTime().Returns(new DateTime(2017, 02, 10, 20, 30, 00));
@@ -89,7 +99,7 @@ namespace Ohce
 
         private OhceInterpreter GivenAnOhceInterpreter(string name = "anyName")
         {
-            return new OhceInterpreter(name, _console, _timeProvider);
+            return new OhceInterpreter(name, _console, _timeProvider, () => endSignal = true);
         }
     }
 
@@ -108,9 +118,11 @@ namespace Ohce
         private readonly string _name;
         private IConsole _console;
         private readonly ITimeProvider _timeProvider;
+        private Action _endSignal;
 
-        public OhceInterpreter(string name, IConsole console, ITimeProvider timeProvider)
+        public OhceInterpreter(string name, IConsole console, ITimeProvider timeProvider, Action endSignal)
         {
+            _endSignal = endSignal;
             _console = console;
             _timeProvider = timeProvider;
             _name = name;
@@ -150,6 +162,7 @@ namespace Ohce
             if (value == "Stop!")
             {
                 _console.Write($"Adios {_name}");
+                _endSignal();
             }
             var reverse = new string(value.Reverse().ToArray());
             if (value == reverse)
