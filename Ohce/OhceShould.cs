@@ -63,8 +63,29 @@ namespace Ohce
         {
             _timeProvider.GetCurrentTime().Returns(new DateTime(2017, 02, 10, 20, 30, 00));
             GivenAnOhceInterpreter(name: "Pedro");
+            _console.ReceivedCalls().Count().Should().Be(1);
             _console.Received(1).Write("Buenas noches Pedro");
         }
+
+
+        [Fact]
+        public void greet_in_the_morning()
+        {
+            _timeProvider.GetCurrentTime().Returns(new DateTime(2017, 02, 10, 06, 30, 00));
+            GivenAnOhceInterpreter(name: "Pedro");
+            _console.ReceivedCalls().Count().Should().Be(1);
+            _console.Received(1).Write("Buenos días Pedro");
+        }
+
+        [Fact]
+        public void greet_in_the_evening()
+        {
+            _timeProvider.GetCurrentTime().Returns(new DateTime(2017, 02, 10, 16, 30, 00));
+            GivenAnOhceInterpreter(name: "Pedro");
+            _console.ReceivedCalls().Count().Should().Be(1);
+            _console.Received(1).Write("Buenas tardes Pedro");
+        }
+
 
         private OhceInterpreter GivenAnOhceInterpreter(string name = "anyName")
         {
@@ -86,12 +107,28 @@ namespace Ohce
     {
         private readonly string _name;
         private IConsole _console;
+        private readonly ITimeProvider _timeProvider;
 
         public OhceInterpreter(string name, IConsole console, ITimeProvider timeProvider)
         {
             _console = console;
+            _timeProvider = timeProvider;
             _name = name;
-            console.Write($"Buenas noches {name}");
+            var hour = _timeProvider.GetCurrentTime().Hour;
+            var morning = hour >= 6 && hour <= 12;
+            var evening = hour >= 12 && hour < 20;
+            if (morning)
+            {
+                console.Write($"Buenos días {name}");
+            }
+            else if (evening)
+            {
+                console.Write($"Buenas tardes {name}");
+            }
+            else
+            {
+                console.Write($"Buenas noches {name}");
+            }
         }
 
         public void Echo(string value)
