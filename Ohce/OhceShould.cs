@@ -32,22 +32,45 @@ namespace Ohce
         [Fact]
         public void return_reserve_word()
         {
-            var interpreter = new OhceInterpreter();
+            var interpreter = GivenAnOhceInterpreter();
             interpreter.Echo("sergio").Should().Be("oigres");
         }
 
         [Fact]
         public void return_greet_and_reserve_with_palindrome_word()
         {
-            var interpreter = new OhceInterpreter();
+            var interpreter = GivenAnOhceInterpreter();
             interpreter.Echo("ana").Should().Be("ana\n¡Bonita palabra!");
+        }
+
+        [Fact]
+        public void return_stop_and_bye_your_name()
+        {
+            var interpreter = GivenAnOhceInterpreter(name:"Pedro");
+            interpreter.Echo("Stop!").Should().Be("Adios Pedro");
+        }
+
+        private static OhceInterpreter GivenAnOhceInterpreter(string name="anyName")
+        {
+            return new OhceInterpreter(name);
         }
     }
 
     public class OhceInterpreter
     {
+        private string _name;
+
+        public OhceInterpreter(string name)
+        {
+            _name = name;
+        }
+
         public string Echo(string value)
         {
+            if (value == "Stop!")
+            {
+                return $"Adios {_name}";
+            }
             var reverse = new string(value.Reverse().ToArray());
             if (value == reverse)
             {
